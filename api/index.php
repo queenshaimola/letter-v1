@@ -1,10 +1,9 @@
 <?php
 
-// Redirect storage and bootstrap cache to /tmp for Vercel serverless
+// Direktori sementara untuk serverless Vercel
 $_ENV['APP_STORAGE'] = '/tmp';
 putenv('APP_STORAGE=/tmp');
 
-// Create required directories in /tmp if they don't exist
 if (!is_dir('/tmp/storage')) {
     mkdir('/tmp/storage', 0755, true);
     mkdir('/tmp/storage/framework', 0755, true);
@@ -14,4 +13,16 @@ if (!is_dir('/tmp/storage')) {
     mkdir('/tmp/storage/logs', 0755, true);
 }
 
-require __DIR__ . '/../public/index.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
+
+$response->send();
+
+$kernel->terminate($request, $response);
